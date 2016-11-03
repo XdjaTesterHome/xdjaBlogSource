@@ -1,6 +1,7 @@
 @echo off
 title = 发布博客文章
 echo 准备发布文章源码到github…………
+git pull 1>nul
 git add . 1>nul 
 set str=
 set /p "str=请输入提交日志信息："
