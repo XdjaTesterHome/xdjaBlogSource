@@ -3,4 +3,11 @@ Thumbs.db
 *.log
 public/
 .deploy*/
-node_modules/hexo-deployer-git
+node_modules/
+scaffolds/
+themes/
+source/about/
+source/categories/
+source/tags/
+source/404.html
+source/favicon.ico
