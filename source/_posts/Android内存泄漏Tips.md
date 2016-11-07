@@ -11,9 +11,9 @@ categories: 实例分析
 - Android开发中，最容易引起内存泄漏问题的是Context，比如之前测安全邮件的时候，退出APP之后进程没有被杀死，所以它引用的大量的view、工具类对象都不能被释放，一泄漏就是一大片的对象。
 
 #### java 内存分配策略
-- 这个话题网上应该挺多总结的，我大概的提一下，方便大家对内存有个印象。
-- 静态存储区（方法区）：主要存放静态数据、全局static数据和常量。这块数据在编译时就已经分配好，并且在程序运行期间都存在。
-- 栈区：当方法被执行时，方法体内的局部变量都在栈上创建，并在方法执行结束时这些局部变量所持有的内存将会自动被释放。因为栈内存分配运算内置于处理器的指令集中，效率很高，但是分配的内存容量有限。
+- 这个话题网上应该挺多总结的，我大概的提一下，方便大家对java内存管理有个印象。
+- 静态存储区（方法区）：主要存放静态数据、全局static数据和常量。这块数据在编译时就已经分配好，并且在程序运行期间都存在，这也是静态变量会引起内存泄漏的原因，下面会多次提到。
+- 栈区：当方法被执行时，方法体内的局部变量都在栈上创建，并在方法执行结束时这些局部变量所持有的内存将会自动被释放。因为栈内存分配运算内置于处理器的指令集中，效率很高，但是分配的内存容量有限，栈区的大小可以通过-xss配置。
 - 堆区：又称动态内存分配，通常就是指在程序运行时直接 new 出来的内存。这部分内存在不使用时将会由 Java 垃圾回收器来负责回收。
 
 #### 下面就分析下常见的内存泄漏问题：
@@ -79,7 +79,7 @@ static Button staticBtn;
   }
 ```
 - 用MAT分析抓到的hprof，搜索发现FirstActivity泄漏，如下图：
-![staticActivity.PNG](/upload/image/zlw/staticActivity.PNG)
+![staticActivity.PNG](/upload/image/zlw/static_view.PNG.PNG)
 
 - 从图中可以看出，FirstActivity通过staticBtn引用了AppCompatButton，最后又通过mContext引用了FirstActivity，又绕回来了。这是因为Activity中的View会持有对Activity的引用。所以最终还是造成Activity内存泄漏。
 
@@ -185,7 +185,7 @@ mInnerClass = new InnerClass();
 ```
 
 - 用MAT分析hprof数据，如下图所示：
-![service.PNG](/uplpad/image/zlw/service.PNG)
+![service.PNG](/upload/image/zlw/service.PNG)
 - 可以看到，注册Listener的时候，sensor会持有外部类的一个实例。造成内存泄漏。
 
 #### 解决方法
@@ -203,7 +203,8 @@ mInnerClass = new InnerClass();
 - 资源未关闭造成的内存泄漏， 比如：File、Cursor、Stream、Bitmap等资源，他们在不使用的时候一定要及时销毁回收。特别是Bitmap，会占用非常大的内存空间。
 
 ## 总结
-- 我们从上面的例子中可以总结出，造成内存泄漏的原因有下面两种：
+我们从上面的例子中可以总结出，造成内存泄漏的原因有下面两种：
 - 过多的使用static变量，并且没有正确释放不用的对象。
 - 对象的生命周期（比如Thread）比Activity的生命周期长，造成内存泄漏。
-- 这里就先总结了常见的内存泄漏场景，后面碰见比较经典的问题再总结。
+
+这里就先总结了常见的内存泄漏场景，后面碰见比较经典的问题再总结。
