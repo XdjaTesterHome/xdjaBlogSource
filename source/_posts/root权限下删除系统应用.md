@@ -22,3 +22,17 @@ $ adb root
   restarting adbd as root
   不过执行这个命令需要root权限
 ```
+
+- 然后可以执行将/system/app/xxx/xxx.apk删除
+```bash
+$ adb shell rm -r /system/app/xxx
+  xxx是你要删除的内置应用apk存放目录。
+```
+
+- 我猜测这里需要重新 adb remount 一下，不过我没有试，我之前得重启手机才可以安装自己的apk。所以猜测需要重新挂载文件系统。
+
+- 接下来就可以安装你自己的apk了。
+
+## 总结
+- 删除之前最好备份一下，方便测试之后的恢复。因为删除系统应用可能会造成系统异常。
+- 碰到其他问题，可以自己Google下。
