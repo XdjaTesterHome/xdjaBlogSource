@@ -80,3 +80,11 @@ duoshuo_share: true
 
 # JiaThis 分享服务
 jiathis: true
+
+# 浏览量
+leancloud_visitors:
+  enable: true
+  app_id: JnVoYDpvhG7gIBFg62R1Uvjq-gzGzoHsz
+  app_key: IQvvWAz2nRuvoJccUC6M5Yfv
+
+firebase: true

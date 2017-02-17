@@ -109,7 +109,14 @@
             &nbsp; | &nbsp;
             <div class="fb-like" data-layout="button_count" data-share="true"></div>
           {% endif %}
-
+{% if theme.firebase and not is_home() %}
+    <span class="post-visit-count">
+      &nbsp; | &nbsp; 
+      <!--眼睛图标-->
+      <i class="fa fa-eye"></i>&nbsp;
+      <span id="detail_cnt">1</span>
+    </span>
+{% endif %}
           {# LeanCould PageView #}
           {% if theme.leancloud_visitors.enable %}
              <span id="{{ url_for(post.path) }}" class="leancloud_visitors" data-flag-title="{{ post.title }}">

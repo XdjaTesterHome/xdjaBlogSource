@@ -16,7 +16,7 @@ categories: Android性能测试
 
 ### 工具
 - 勾选【显示过度绘制区域】后在屏幕上会呈现出不同的颜色，如下图所示：
-![过度重绘](/upload/image/过度绘制1.png)
+![过度重绘](/upload/image/zlw/过度绘制1.png)
 
 没有颜色（白色）： 意味着没有overdraw。像素只画了一次。
 蓝色： 意味着overdraw 1倍。像素绘制了两次。（因为overdraw时，屏幕上同一位置像素点两个view都需要绘制）
@@ -35,24 +35,24 @@ categories: Android性能测试
 
 碰到过渡重绘的问题，可以从以下几个思路来分析问题：
 
-###### 页面层级太多
+#### 页面层级太多
 - 我们可以使用AndroidStudio monitor 【Layout Inspecter】工具（最好用最新版，记得之前的版本好像还没集成Layout Inspecter），如下图所示：
-![LayoutInspector](/upload/image/LayoutInspecter.PNG)
+![LayoutInspector](/upload/image/zlw/LayoutInspecter.PNG)
 
 - 抓取到的结果如下图所示：
-![过渡重绘](/upload/image/LayoutInspecterResult.PNG)
+![过渡重绘](/upload/image/zlw/LayoutInspecterResult.PNG)
 
 - 上图第1部分是界面元素的构成情况，是分层展示的。可再回过头去想下上面提到的子view和父view的关系。
 - 上图第2部分是我们能看到的界面的样子，鼠标在上面移动，图中第1和3部分也会跟着改变值。
 - 上图第3部分是我们在第2部分选中view的一些属性值。比如我们写UI自动化时，可以从这里查看坐标或者元素id。
 
 - 我截取了我认为有问题的元素，如下图所示：
-!![过渡重绘实例](/upload/image/过渡重绘.PNG)
+!![过渡重绘实例](/upload/image/zlw/过渡重绘.PNG)
 
 - 这个页面，三个item都是淡红色的，查看他们布局，我觉得用红线圈中的第二个LinearLayout可以考虑去掉，直接用RelativeLayout来实现，这样可以节省一层。
 - 不过对布局问题的排查，需要一些Android界面的基础知识，但也不难，大家可以熟悉常见的几种布局即可。RelativeLayout、LinearLayout、FrameLayout。
 
-###### 去掉View没必要的背景色
+#### 去掉View没必要的背景色
 - 这种问题也比较常见，开发在写布局时，经常先加个背景，方便调整界面，但是完成之后，背景可能被其他的View覆盖，就忘记去掉。
 - 不过这个需要有布局文件才能去查看，可以问开发要一份代码，便于分析问题。
 - 但是如果没有开发代码，也可以通过 apktool 命令来反编译apk的资源文件，也是可以拿到布局文件的。（不过现在有的公司已经将资源文件也处理了，比如360，但大部分的还是可以的）
@@ -62,15 +62,15 @@ categories: Android性能测试
 
 ## FPS（页面帧率）
 ### 概念
-###### 60fps VS 16ms VS 60HZ
+#### 60fps VS 16ms VS 60HZ
 - 60HZ是屏幕的刷新频率，即1s内，屏幕被刷新来展示数据的次数。
 - 60fps是系统1s内绘制的图像帧的数目，有一些对比数据，让我们更好的理解fps， 书本快速翻页（小时候看的那种小人书）是12fps， 电影胶片的帧率是24fps。30fps已经能够展示相对流畅的画面，而60fps能够将画面展示的更加逼真和绚丽。不过大于60fps，对于人类的眼睛已经没有什么区别了，但fps越高，硬件成本会提高，所以Google将帧率的标准定为60（页面流畅的标准，理论上小于这个值，页面会有卡顿感）。不过有人肯定会有疑问，为啥电影用24fps就够了，那是因为电影胶片的一帧带有一些方向及动态元素，而手机上的一帧就是静态的一帧（之前其实尝试过高帧电影，但效果不理想，现在还在不断尝试）。
 - 16ms是系统绘制一帧的时间，计算方法 = 1s / 60 fps   约等于16ms。
 
 ### 工具
-###### AndroidStudio测试工具介绍
+#### AndroidStudio测试工具介绍
 - 最新的AndroidStudio monitor已经集成了GPU测试工具，如下图所示：
-!![GPU](/upload/image/monitor_Gpu.PNG)
+!![GPU](/upload/image/zlw/monitor_Gpu.PNG)
 
 - 图中 1 是个【Launch in GFX trace mode】,可以用来trace 图形加载过程中每一帧的绘制过程，这个非常有用，可以很准备的查看每一帧都绘制了什么。但需要一些gl绘制命令的知识，目前我也没搞太明白。研究中。
 - 图中2 是四种色值（因为我用的5.x的手机，6.x的设备有9种色值，将绘制的过程更加的细化），我这里就介绍下四种色值的情况，对于6.x设备的情况，大家可以自己查一下去了解：
@@ -84,14 +84,14 @@ categories: Android性能测试
 - y轴代表的一帧绘制的时间。
 - 此外，和X轴平行的还有一根绿线和红线。绿线表示的是60fps，红线表示的是30fps。
 
-###### Android手机上测试工具
+#### Android手机上测试工具
 - 此外Android手机上也有GPU调试工具，在【开发者选项】—— 【GPU呈现模式分析】 选择【在屏幕上显示为条形图】，这样在手机上就能看到展示了，如下图所示：
-![Android_gps](/upload/image/android_gps.png)
+![Android_gps](/upload/image/zlw/android_gps.png)
 
 - 它的色值代表的含义和AndroidStudio工具的是一样的。
 - 上面提到的两种工具都可以，根据自己的需要选择。
 
-###### 其他工具
+#### 其他工具
 - 腾讯的GT，腾讯提出来页面流畅度的概念，认为fps并不能代表页面是否流畅的标准，因为在不滑动的时候，fps为0，但并不能说页面不流畅，所以fps也并不是越小页面越不流畅。它们认为1s内有多少vsync，才能代表页面是否流畅，详细介绍可参考[如何量化Android应用的“卡”？---流畅度原理&定义篇](http://mp.weixin.qq.com/s?__biz=MzA3NTYzODYzMg==&mid=208258190&idx=2&sn=22af4f01a6090599da3dca4c44f0f396&scene=21#wechat_redirect)
 - 因为我觉得测fps时，我们一般会在不断滑动和操作页面，理论上可排除静止时fps为0的情况，我们暂时还推荐用AndroidStudio的工具。不过我们要知道有这么回事。
 
@@ -99,7 +99,7 @@ categories: Android性能测试
 - 帧率问题排查相对CPU、Memory等，略复杂，很多时候需要多种工具结合起来使用，并且需要对Android的一些绘制原理比较熟悉，所以这里如果不结合具体实例，可能讲不明白，后面碰到具体问题，再写一篇文章介绍。
 - 一般会用到的工具，【traceView】【systrace】【OpenGL Trace（和上面提到的AndroidStudio GPU monitor中的GFX trace类似）】。
 
-###### 分析问题的大致思路
+#### 分析问题的大致思路
 
 这里只能先写点假如我碰到卡顿问题怎么去分析的思路：
 - 首先在滑动过程中，用traceView抓一个trace，分析onDraw()方法比较耗时的操作，或者列表滑动时，是否重复的Infalate()。主要是找和View的绘制相关的方法，是否有耗时的方法。
