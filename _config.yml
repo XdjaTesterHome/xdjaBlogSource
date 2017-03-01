@@ -88,3 +88,4 @@ leancloud_visitors:
   app_key: IQvvWAz2nRuvoJccUC6M5Yfv
 
 firebase: true
+avatar: /images/avatar.jpg
