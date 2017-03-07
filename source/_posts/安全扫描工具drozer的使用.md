@@ -2,7 +2,7 @@
 title: 安全扫描工具drozer的使用
 date: 2017-03-01 15:07:17
 tags: drozer, 安全扫描
-category: 工具使用
+categories: 工具使用
 ---
 
 ## 背景
@@ -64,6 +64,22 @@ category: 工具使用
 ##### 同时检测SQL注入和目录遍历
 - run scanner.provider.injection -a packageName
 - run scanner.provider.traversal -a packageName
+
+#### intent组件触发（拒绝服务、权限提升）
+##### 介绍名词
+- 拒绝服务：应用在使用getIntent()，getAction()，Intent.getXXXExtra()获取到空数据、异常或者畸形数据时没有进行异常捕获，应用就会发生Crash，应用不可使用（本地拒绝服务）。有些恶意应用可通过向受害者应用发送此类空数据、异常或者畸形数据从而使应用产生本地拒绝服务
+- 权限提升：
+
+##### 查看暴露的广播组件信息
+- run app.broadcast.info -a com.package.name　　获取broadcast receivers信息
+- run app.broadcast.send --component 包名 --action android.intent.action.XXX
+
+##### 尝试拒绝服务攻击检测，向广播组件发送不完整intent（空action或空extras）
+- run app.broadcast.send 通过intent发送broadcast receiver
+######  空action
+- run app.broadcast.send --component 包名 ReceiverName
+###### 空extras
+- run app.broadcast.send --action android.intent.action.XXX
 
 #### 检查service问题
 - run scanner.service -a packageName
