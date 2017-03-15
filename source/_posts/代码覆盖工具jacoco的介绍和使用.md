@@ -59,16 +59,129 @@ categories: 工具使用
 >1. Replace:修改字节码生成新的class。
 >2. InJect: 在原有的class上面修改。
 
-- 更详细的可以参考腾讯tmq写的系列文章(JAVA代码覆盖率工具JaCoCo-原理篇)[http://tmq.qq.com/2016/08/java-code-coverage-tools-jacoco-principle/],它里面详细介绍了根据代码逻辑type，怎么埋标记探针。当然也可以找源码看看，不过我也没看源码呢。
+- 更详细的可以参考腾讯tmq写的系列文章[JAVA代码覆盖率工具JaCoCo-原理篇](http://tmq.qq.com/2016/08/java-code-coverage-tools-jacoco-principle/),它里面详细介绍了根据代码逻辑type，怎么埋标记探针。当然也可以找源码看看，不过我也没看源码呢。
 
 ### JaCoCo使用
+- JaCoco 提供了很多使用方式，比如：Ant、命令行、Maven、gradle、jenkins集成。
+- 我比较关心的方式是（主要针对Android项目）：Jacoco和UI自动化结合、Jacoco和手动测试结合、Jacoco与Jenkins的集成。
+- 其实gradle中android插件已经支持了jacoco的使用，因此我们只需要在app build.gradle中配置 jaCoco 以及在buildTypes中配置testCoverageEnabled=true,如下是我写的一个demo：
 
-#### Apache Ant方式
+``` java
+apply plugin: 'com.android.application'
+apply plugin: 'jacoco'
 
-#### 命令行方式
+android {
+    compileSdkVersion 25
+    buildToolsVersion "25.0.0"
+    defaultConfig {
+        applicationId "xdja.com.dreamcode"
+        minSdkVersion 15
+        targetSdkVersion 25
+        versionCode 1
+        versionName "1.0"
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
 
-#### Apache Maven方式
+        debug{
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            zipAlignEnabled true
+            testCoverageEnabled = true
+        }
+    }
+}
 
-#### Apache Maven方式
+def coverageSourceDirs = [
+        '../app/src/main/java'
+]
+task jacocoTestReport(type: JacocoReport) {
+    group = "Reporting"
+    description = "Generate Jacoco coverage reports after running tests."
+    reports {
+        xml.enabled = true
+        html.enabled = true
+    }
+    classDirectories = fileTree(
+            dir: './build/intermediates/classes/debug',
+            excludes: ['**/R*.class',
+                       '**/*$InjectAdapter.class',
+                       '**/*$ModuleAdapter.class',
+                       '**/*$ViewInjector*.class'
+            ])
+    sourceDirectories = files(coverageSourceDirs)
+    executionData = files("$buildDir/outputs/code-coverage/connected/coverage.ec")
 
-#### 与Jekins集成
+    doFirst {
+        new File("$buildDir/intermediates/classes/").eachFileRecurse { file ->
+            if (file.name.contains('$$')) {
+                file.renameTo(file.path.replace('$$', '$'))
+            }
+        }
+    }
+}
+
+dependencies {
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+    androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
+        exclude group: 'com.android.support', module: 'support-annotations'
+    })
+    compile 'com.android.support:appcompat-v7:25.0.1'
+    testCompile 'junit:junit:4.12'
+}
+```
+
+- 上面jacocoTestReport 任务用于将采集的ec文件转成html文件。
+
+### Jacoco和手动测试结合
+- 与手动结合测试，思路是通过反射，获取收集的覆盖率数据：
+
+``` java
+out = new FileOutputStream(mCoverageFilePath.getPath(), true);
+            Object agent = Class.forName("org.jacoco.agent.rt.RT")
+                    .getMethod("getAgent")
+                    .invoke(null);
+            out.write((byte[]) agent.getClass().getMethod("getExecutionData", boolean.class)
+                    .invoke(agent, false));
+```
+- 网上有人实现了一种方式是不修改源码的情况下，通过Instrumentation来启动个集成首页Activity的页面，然后当测试完成销毁页面的时候会去执行收集数据的代码。
+- 不过实现方式上可以根据自己的需要来实现触发收集数据的场景，比如搞个广播、长按某个物理键等等。
+- 生成的数据时ec格式，需要用到上面的jacocoTestReport task，转成html文件。生成的报告位于：.\app\build\reports\jacoco\jacocoTestReport目录
+
+### Jacoco和UI自动化结合
+- 首先需要了解gradle android plugin 一些内置的命令：
+
+列名 | 描述
+---- | ---- :|
+connectedAndroidTest | 执行android的case
+createDebugCoverageReport | 产生代码覆盖率的报告
+connectedCheck | 包含上面2个任务
+
+- 只需要将UI自动化代码准备好，然后执行：
+
+``` bash
+$ gradlew clean createDebugCoverageReport
+```
+- 这个命令会执行UI自动化代码，同时生成jaCoCo报告。
+- 生成的JaCoCo报告位于：\app\build\reports\coverage（在reports目录下还有单元测试的结果报告）。
+- 这里再介绍个手动测试收集代码覆盖率的思路： 在UI自动化中，执行一个sleep（比如停10分钟），这10分钟内可以手动操作测试业务，然后10分钟之后，UI自动化结束后会自动生成报告，可以参考[Android手工测试的代码覆盖率](https://testerhome.com/topics/2510)
+
+### Jacoco与Jenkins的集成
+- Jenkins 集成Jacoco，其实其原理和上面提到的gradle的处理方式是比较类似的。
+- 首先Jenkins需要安装一个【Jacoco plugin】，然后在项目配置文件中会有如下图所示的配置选项：
+![Jenkins-Jacoco](/upload/image/zlw/jenkins-jacoco.png)
+
+其主要配置如下：
+- Path to Exec files：\app\build\outputs\code-coverage\connected\coverage.ec    这个路径是执行gradle任务时，生成的ec文件的目录。
+- Path to class directories:   \app\build\intermediates\classes\debug           这个路径是编译之后生成class所在的目录
+- Path to source directories :  /src/main/java            源代码所在路径
+- Inclusions： com/xxx/xxx/ *.class       包含哪些class文件。
+- Exclusions： **/R.class, **/R$*.class, **/Manifest.class , **/Manifest$*.class, **/BuildConfig.class
+>- 这里需要注意，路径结尾的/必须去掉，否则会有非预期的结果，其实也就是加载了我们不需要的目录。
+
+## 总结
+- 代码覆盖率虽然对于项目质量不具有绝对的衡量意义，但是对于优化我们的测试用例及UI自动化脚本还是非常有用的。通过代码覆盖率结果，我们大致可以知道我们的UI自动化脚本对代码的覆盖程度。
+- 因此应该推动代码覆盖率在项目中的应用。

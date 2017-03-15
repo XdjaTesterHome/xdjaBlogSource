@@ -15,7 +15,8 @@ categories: Android技术
 - adb server
 - adb client
 - adb deamon
-### 接下来就分开介绍下他们的原理
+
+接下来就分开介绍下他们的原理
 #### adb server
 - ADB Server是运行在主机上的一个后台进程。它有两个作用：1）检测USB端口感知设备的连接和拔除，以及模拟器实例的启动或停止；2）将adb client的请求通过usb或者tcp的方式发送到对应的adbd上。
 - ADB server默认监听5037端口，我们可以通过在cmd命令行输入netstat -nao | findStr 5037 来查看哪个pid的进程在监听5037，我电脑上的pid = 13740，然后再通过tasklist来查看13740对应的应用程序是啥？如下图可以看到是adb.exe（就是adb server）。

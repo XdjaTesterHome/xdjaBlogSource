@@ -22,7 +22,7 @@ categories: Android性能测试
   ![batterystats](/upload/image/batterystats.png)
   - 所以从Android4.4开始，想通过api来获取电量也不是那么容易，好在从Android5.0开始，google 又开放了一个利器【batteryStats】（其实它就是执行的api代码），通过这个命令可以收集 从上次充电开始一段时间内的电量数据（换句话说就是不充电状态下的电量数据）。
 
-## 实现过程
+## 软件方式实现原理
 #### API方式
 - 主要涉及到三个类和一个方法，分别是：BatteryStatsHelper、BatteryStatsImpl、PowerProfile，分别介绍下它们：
 

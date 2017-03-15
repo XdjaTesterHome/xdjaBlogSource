@@ -87,7 +87,6 @@ categories: 工具使用
 #### 文件操作
 - run scanner.misc.writablefiles --privileged /data/data/com.sina.weibo
 - run scanner.misc.readablefiles --privileged /data/data/com.sina.weibo
-- run app.broadcast.send --component 包名 --action android.intent.action.XXX
 
 #### 其他
 - 我这里只是列出了命令，并没有结合具体的例子，大家可以参考[drozer的使用](http://www.cnblogs.com/1chavez/p/4492574.html)，这里的有一些更具具体的例子。
