@@ -95,3 +95,7 @@ $ run.app.activity.start -component packageName activity   可以启动对应有
 ## 平台化
 - 国内有一些公司基于[MobSf](https://github.com/liwei721/Mobile-Security-Framework-MobSF)来做自己的安全平台，这个后续可以作为一个研究内容。
 - 抽空需要了解它的源码及原理。
+
+## 参考资料
+- [腾讯御安全技术博客](http://yaq.qq.com/blog)
+- [360安全博客](http://appscan.360.cn/blog)
